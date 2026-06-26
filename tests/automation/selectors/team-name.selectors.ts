@@ -5,6 +5,7 @@ export const teamNameSelectors = {
   teamNameInput: '#teamName',
   titleInput: '#title',
   descriptionInput: '#description',
+  releaseDateInput: '#releaseDate',
   createReleaseTitle: '#create-release-title',
 
   // Form submit

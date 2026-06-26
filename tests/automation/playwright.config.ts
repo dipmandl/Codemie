@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './specs',
   timeout: 30_000,
   retries: 1,
-  reporter: [['html', { outputFolder: 'reports', open: 'never' }]],
+  reporter: [['html', { outputFolder: 'reports/html', open: 'never' }]],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:5173',
     trace: 'on-first-retry',

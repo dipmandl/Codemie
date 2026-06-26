@@ -1,10 +1,11 @@
 export const teamNameData = {
-  route: '/product_release_dashboard/',
+  route: '/',
   release: {
     product: 'Billing API',
     version: 'v1.4.0',
     title: 'Release title',
     description: 'Some summary',
+    releaseDate: '2026-06-26',
   },
   teamNames: {
     normal: 'Platform Team',

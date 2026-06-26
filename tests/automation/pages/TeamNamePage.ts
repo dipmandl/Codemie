@@ -6,6 +6,8 @@ export class TeamNamePage {
 
   async goto(route: string) {
     await this.page.goto(route);
+    await this.page.evaluate(() => localStorage.clear());
+    await this.page.reload();
     await expect(this.page.locator(s.createReleaseTitle)).toBeVisible();
   }
 
@@ -15,12 +17,14 @@ export class TeamNamePage {
     teamName?: string;
     title: string;
     description: string;
+    releaseDate: string;
   }) {
     await this.page.locator(s.productInput).fill(args.product);
     await this.page.locator(s.versionInput).fill(args.version);
     await this.page.locator(s.teamNameInput).fill(args.teamName ?? '');
     await this.page.locator(s.titleInput).fill(args.title);
     await this.page.locator(s.descriptionInput).fill(args.description);
+    await this.page.locator(s.releaseDateInput).fill(args.releaseDate);
   }
 
   async submit() {
