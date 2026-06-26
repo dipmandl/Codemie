@@ -18,6 +18,7 @@ releaseForm.addEventListener("submit", (event) => {
     id: crypto.randomUUID(),
     product: String(formData.get("product") || "").trim(),
     version: String(formData.get("version") || "").trim(),
+    teamName: String(formData.get("teamName") || "").trim(),
     title: String(formData.get("title") || "").trim(),
     description: String(formData.get("description") || "").trim(),
     releaseDate: String(formData.get("releaseDate") || ""),
@@ -87,7 +88,10 @@ function renderReleaseList() {
     const card = template.content.firstElementChild.cloneNode(true);
     card.classList.toggle("breaking", release.isBreaking);
 
-    card.querySelector(".product-version").textContent = `${release.product} - ${release.version}`;
+    const teamName = String(release.teamName || "").trim();
+    card.querySelector(".product-version").textContent = teamName
+      ? `${release.product} - ${release.version} ... ${teamName}`
+      : `${release.product} - ${release.version}`;
     card.querySelector(".release-title").textContent = release.title;
     card.querySelector(".release-description").textContent = release.description;
     card.querySelector(".release-date").textContent = `Release date: ${formatDate(release.releaseDate)}`;
