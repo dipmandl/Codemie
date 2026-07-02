@@ -76,6 +76,7 @@ function readFormValues() {
   return {
     product: String(formData.get("product") || "").trim(),
     version: String(formData.get("version") || "").trim(),
+    teamName: String(formData.get("teamName") || "").trim(),
     title: String(formData.get("title") || "").trim(),
     description: String(formData.get("description") || "").trim(),
     releaseDate: String(formData.get("releaseDate") || ""),
