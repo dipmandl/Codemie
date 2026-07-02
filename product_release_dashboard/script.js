@@ -5,17 +5,75 @@ const releaseList = document.getElementById("release-list");
 const template = document.getElementById("release-card-template");
 const productFilterInput = document.getElementById("product-filter");
 const breakingFilterSelect = document.getElementById("breaking-filter");
+const submitBtn = document.getElementById("submit-btn");
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
 let releases = loadReleases();
+let editingReleaseId = null;
 
 renderReleaseList();
 
 releaseForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  const updated = readFormValues();
+
+  if (!updated.product || !updated.version || !updated.title || !updated.description || !updated.releaseDate) {
+    return;
+  }
+
+  if (editingReleaseId) {
+    releases = releases.map(r => r.id === editingReleaseId ? { ...r, ...updated } : r);
+  } else {
+    releases.unshift({ id: crypto.randomUUID(), ...updated });
+  }
+
+  saveReleases(releases);
+  exitEditMode();
+  renderReleaseList();
+});
+
+cancelEditBtn.addEventListener("click", () => {
+  exitEditMode();
+});
+
+releaseList.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-action='edit']");
+  if (!btn) return;
+  startEdit(btn.dataset.releaseId);
+});
+
+productFilterInput.addEventListener("input", renderReleaseList);
+breakingFilterSelect.addEventListener("change", renderReleaseList);
+
+function startEdit(id) {
+  const release = releases.find(r => r.id === id);
+  if (!release) return;
+  editingReleaseId = id;
+  setFormValues(release);
+  setEditModeUI(true);
+  releaseForm.scrollIntoView({ behavior: "smooth" });
+}
+
+function exitEditMode() {
+  editingReleaseId = null;
+  releaseForm.reset();
+  setEditModeUI(false);
+}
+
+function setFormValues(release) {
+  document.getElementById("product").value = release.product || "";
+  document.getElementById("version").value = release.version || "";
+  document.getElementById("teamName").value = release.teamName || "";
+  document.getElementById("title").value = release.title || "";
+  document.getElementById("description").value = release.description || "";
+  document.getElementById("releaseDate").value = release.releaseDate || "";
+  document.getElementById("breaking").checked = !!release.isBreaking;
+}
+
+function readFormValues() {
   const formData = new FormData(releaseForm);
-  const release = {
-    id: crypto.randomUUID(),
+  return {
     product: String(formData.get("product") || "").trim(),
     version: String(formData.get("version") || "").trim(),
     title: String(formData.get("title") || "").trim(),
@@ -23,19 +81,12 @@ releaseForm.addEventListener("submit", (event) => {
     releaseDate: String(formData.get("releaseDate") || ""),
     isBreaking: formData.get("breaking") === "on"
   };
+}
 
-  if (!release.product || !release.version || !release.title || !release.description || !release.releaseDate) {
-    return;
-  }
-
-  releases.unshift(release);
-  saveReleases(releases);
-  releaseForm.reset();
-  renderReleaseList();
-});
-
-productFilterInput.addEventListener("input", renderReleaseList);
-breakingFilterSelect.addEventListener("change", renderReleaseList);
+function setEditModeUI(isEdit) {
+  submitBtn.textContent = isEdit ? "Save Changes" : "Add Release Note";
+  cancelEditBtn.classList.toggle("hidden", !isEdit);
+}
 
 function loadReleases() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -95,6 +146,9 @@ function renderReleaseList() {
     const badge = card.querySelector(".badge");
     badge.textContent = release.isBreaking ? "Breaking Change" : "Non-Breaking";
     badge.classList.add(release.isBreaking ? "breaking" : "safe");
+
+    const editBtn = card.querySelector("[data-action='edit']");
+    editBtn.dataset.releaseId = release.id;
 
     releaseList.appendChild(card);
   }
