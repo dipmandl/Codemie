@@ -1,83 +1,135 @@
-# Implementation Plan: Add Team Name Input Field to Release Notes Dashboard
+# Implementation Plan: Display Team Name on Release Cards
 
 Repo: https://github.com/dipmandl/Codemie (folder: `product_release_dashboard`/)
-Branch: `plan/add-team-name-input`
+Branch: `feature/release-archive-and-team-display`
+Priority: High
 
-JIRA: Link provided by request: https://mandlikdipak52.atlassian.net/jira/software/projects/COD/boards/67
+Source Story: FF-GAP-004 - "Team Name captured but not visible or usable"
 
-Requirement (from user)
-- "Create an input field to add team name"
+- Title: Display Team Name on release cards (avoid empty label) to improve ownership visibility
+- Description: Team Name is captured in the form and persisted in localStorage, but it is holding no product value because it isn't rendered. Users need to see ownership on the card so they can quickly identify the release owner.
 
-> Assumptions (due to no additional details provided)
-> - Team Name is a free-text text field (not a dropdown).
-> - It is required to create a release note.
-> - Team Name can be used later for filtering, but this story only adds the field, persists it, and displays it.
-> - Data is persisted in browser localStorage (current app behavior).
+- Business goal: Make release ownership clear by showing the Team Name already captured, improving traceability and accountability.
 
-## 1) Scope / Out of Scope
+- Priority: High
+
+## Feature Overview
+
+Add a Team Name line to each release card when a release has `teamName` populated. The UI must not show an empty label or placeholder when the value is missing/empty.
+
+## Business Goal
+
+Improve ownership visibility for releases so stakeholders know who to contact and can more easily scan the list.
+
+## Scope
 
 ### In Scope
-- Add a "Team Name" input field to the "Create a Release Note" form.
-- Save the team name along with release data into localStorage.
-- Display Team Name on each release card (in Release List).
-- Handle existing records without teamName gracefully (backwards compatible).
-- Update seed data to include team names so the feature is verifiable out-of-the-box.
+- Render Team Name on release cards when present
+- Hide Team Name UI when empty or missing
+- Backwards compatibility for existing localStorage records without `teamName`
+- Ensure Team Name shows for new and edited releases
 
 ### Out of Scope
-- Add a new filter by team name (can be a separate story).
-- Persistence to backend /DATABASE (not available in this repo).
-- User management / auth.
+- Adding a Team filter (possible future story)
+- Changing whether Team Name is required (currently it is optional in the form)
 
-## 2) Acceptance Criteria
+## Functional Requirements
 
-AC-1: Team Name field on form
-- Given I am on "Create a Release Note"
-- Then I see a new input field labeled "Team Name"
-- And the field is required
+- FR-1: When a release has a non-empty `teamName`, the release card must display it
+- FR-2: When a release has an empty/missing `teamName`, the card must not show a Team Name label or blank value
+- FR-3: Existing release notes in localStorage without `teamName` must still render without errors
 
-AC-2: Team Name is persisted
-- When I submit a new release note
-- Then it is saved to localStorage with a non-empty `teamName` property
+## Non-functional Requirements
 
-AC-3: Team Name is displayed
-- Given the Release List is rendered
-- Then each release card shows the team name for that release
+- NFR-1: Changes must not break existing layout
+- NFR-2: No change required to localStorage key or storage format beyond adding an optional field
 
-AC-4: Backwards compatibility
-- Given there are existing releases in localStorage without `teamName`
-- When the dal loads and renders
-- Then the page does not error and displays a safe fallback (e.g., hide team line or show "- ”)
+## Existing Implementation
 
-## 3) Data Model Change (localStorage)
+- `product_release_dashboard/index.html`: Already includes a Team Name input field in the form (optional)
+- `product_release_dashboard/script.js`: Already persists `teamName` on create/edit and populates it on edit
+- Release card template does not include a dedicated Team Name node
+- Seed data does not include `teamName`
 
-Current: `release` object has: `id, product, version, title, description, releaseDate, isBreaking.`
-New: add `teamName: string`
+## Proposed Changes
 
-## 4) Implementation Steps (By File)
+1) (UI) Update the release card template to include a new element for Team Name
+   - Add accessible markup, e.g. `<p class="release-team"></p>` under `.product-version` to keep metadata together
 
-#### 4.1 `product_release_dashboard/index.html`
-1. Add a new input field inside the form grid:
-   - Input name: `teamName`
-   - ID: `teamName`
-   - Placeholder: e.g. "Platform"
-   - Add `required` attribute
+2) (JS) Update render logic to populate and conditionally show it
+   - If `release.teamName` is truthy after trim, set text content to `Team: <teamName>` (or just `<teamName>` depending on UI copy)
+   - Else hide the element (add `.hidden`)
 
-### 4.2 `product_release_dashboard/script.js`
-1. In submit handler, read Team Name from FormData and add to the release object:
-   `teamName: String(formData.get("teamName") || "").trim()`
-2. Update the required field guard check to include `teamName`.
-3. Update card rendering to display team name:
-   - Option A (quick): Append to `.product-version` text
-   - Option B recommended: Add a new dom line in template for `team-name` and populate it
-     - Fallback if empty/undefined (old data)
-4. Update `seedData()` items to include `teamName`.
+3) (Data) Update seed data to include Team Name values
+   - Add `teamName` to records `r1`/`r2` so feature is visible on first load
 
-### 4.3 `product_release_dashboard/styles.css` (optional)
-- If a new `.team-name` element is added, style it to match existing type hierarchy (muted color, smaller font).
+4) (CSS) Add style for the Team line
+   - Muted color (`var(--muted)`) and slightly smaller font-size to match other metadata
 
-## 5) Manual Test Checklist
+## File Changes
 
-- Can create a release with Team Name and all existing fields.
-- Team Name persists after page reload.
-- Release card shows Team Name.
-- No JS errors when localStorage has old release objects without `teamName`.
+### Modify
+- `product_release_dashboard/index.html`
+  - Add new DOM node in `<template id="release-card-template">` for `.release-team`
+
+- `product_release_dashboard/script.js`
+  - In `renderReleaseList()`, set/hide `.release-team` based on `release.teamName`
+  - In `seedData()`, add `teamName` properties
+
+- `product_release_dashboard/styles.css`
+  - Add `.release-team` styling
+
+### New Files
+- None
+
+## Data Flow
+
+1) User creates/edits release note (form)
+2) `script.js` persists `teamName` to localStorage
+3) On render, Team Name is read from the release object and conditionally rendered
+
+## UI Changes
+
+- Release card: add a new metadata line for Team Name when present
+
+## Validation
+
+- No additional form validation required for this story (display-only)
+- Render must treat `teamName` as optional
+
+## Error Handling
+
+- If `teamName` missing/null, do not attempt to call `.trim()` on null; use safe default (`""`) or truthy checks
+
+## Edge Cases
+
+- Team Name is whitespace only: treat as empty and hide
+- Existing data without teamName: no error; hide line
+
+## Testing Plan
+
+### Manual
+- Create a new release with Team Name: verify card shows team
+- Create a release without Team Name: verify no empty label is shown
+- Edit a release and add/remove Team Name: verify re-render correct
+- Reload page: verify content persists
+
+## Risks
+
+- Low: minimal markup/CSS changes; should not affect logic
+
+## Dependencies
+
+- None
+
+## Acceptance Criteria Mapping
+
+- AC-1 Display team name when present → template node + render logic
+- AC-2 Hide when empty → conditional hide in render
+- AC-3 Edit persists and renders after refresh → already persistence flow; verify via tests
+
+## Definition of Done
+
+- Code changes integrated without JS errors
+- Team Name displays conditionally and does not show empty labels
+- Manual test checklist passed
