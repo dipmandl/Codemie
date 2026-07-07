@@ -30,6 +30,11 @@
             <input type="text" id="version" name="version" placeholder="e.g., v1.4.0" required />
           </label>
 
+          <label>
+            Team Name
+            <input type="text" id="teamName" name="teamName" placeholder="e.g., Platform" />
+          </label>
+
           <label class="span-2">
             Title
             <input type="text" id="title" name="title" placeholder="e.g., Faster invoice export" required />
@@ -52,7 +57,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit">Add Release Note</button>
+          <button type="button" id="cancel-edit-btn" class="btn-cancel hidden">Cancel</button>
+          <button type="submit" id="submit-btn">Add Release Note</button>
         </div>
       </form>
     </section>
@@ -89,6 +95,9 @@
       <h3 class="release-title"></h3>
       <p class="release-description"></p>
       <p class="release-date"></p>
+      <div class="card-actions">
+        <button type="button" class="btn-edit" data-action="edit">Edit</button>
+      </div>
     </article>
   </template>
 
