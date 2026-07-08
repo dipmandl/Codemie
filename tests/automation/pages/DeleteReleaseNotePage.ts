@@ -4,16 +4,15 @@ import { DeleteReleaseNoteSelectors as S } from '../selectors/delete-release-not
 export class DeleteReleaseNotePage {
   constructor(private readonly page: Page) {}
 
-  async goto() {
-    await this.page.goto('/product_release_dashboard/index.html');
-  }
-
   async setSeedReleases(storageKey: string, releases: unknown) {
+    // Ensure we are on the dashboard origin before touching localStorage
+    await this.page.goto('/product_release_dashboard/index.html');
+
     await this.page.evaluate(
       ([key, value]) => {
         localStorage.setItem(key, JSON.stringify(value));
       },
-      [storageKey, releases ] as const
+      [storageKey, releases] as const
     );
     await this.page.reload();
   }
