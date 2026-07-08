@@ -7,11 +7,10 @@ export const DeleteReleaseNoteData = {
       product: 'Billing API',
       version: 'v1.4.0',
       teamName: 'Platform',
-      title: 'Invoice export now supports CSV and XLSZ',
+      title: 'Invoice export now supports CSV and XLSX',
       description: 'Added dual-format export and improved export speed for large accounts.',
       releaseDate: '2026-06-08',
       isBreaking: false,
-      archived: false,
     },
     {
       id: 'r2',
@@ -22,8 +21,14 @@ export const DeleteReleaseNoteData = {
       description: 'Old response shape is deprecated. Clients should migrate to the new claims object format.',
       releaseDate: '2026-06-10',
       isBreaking: true,
-      archived: false,
     },
+  ],
+
+  // Two releases, only one is breaking – used to avoid test depending on order
+  seedReleasesBreakingOnly: [
+    {
+      ...reference(undefined)
+    }
   ],
 
   filters: {
