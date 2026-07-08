@@ -8,12 +8,12 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
 
+
     const titleToDelete = D.seedReleases[0].title;
 
     const beforeTitles = await page.getCardTitles();
     expect(beforeTitles).toContain(titleToDelete);
 
-    // Confirm browser dialog
     dashboardPage.once('dialog', async (dialog) => {
       expect(dialog.type()).toBe('confirm');
       await dialog.accept();
@@ -24,7 +24,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     await expect.poll(async () => await page.getCardTitles()).not.toContain(titleToDelete);
   });
 
-  test('Confirming deletion persists removal to localStorage and survives refresh', async ({ dashboardPage }) => {
+  test('Canfirming deletion persists removal to localStorage and survives refresh', async ({ dashboardPage }) => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
 
@@ -38,7 +38,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     await page.deleteButtonForTitle(titleToDelete).click();
 
     const raw = await getLocalStorageItem(dashboardPage, D.storageKey);
-    expect(raw).not.toNull();
+    expect(raw).not.toBeNull();
 
     const parsed = JSON.parse(raw as string) as Array<{ id: string; title: string }>;
     expect(parsed.some((r) => r.title === titleToDelete)).toBe(false);
@@ -50,6 +50,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
   test('Canceling deletion makes no changes to UI or localStorage', async ({ dashboardPage }) => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
+
 
     const titleToDelete = D.seedReleases[0].title;
 
@@ -83,7 +84,6 @@ test.describe('CS-20 Delete release note with confirmation', () => {
 
     await page.deleteButtonForTitle(titleToDelete).click();
 
-
     await expect.poll(async () => await page.isEmptyStateVisible()).toBe(true);
   });
 
@@ -104,7 +104,6 @@ test.describe('CS-20 Delete release note with confirmation', () => {
 
     await page.deleteButtonForTitle(D.seedReleases[0].title).click();
 
-    // Filter should remain applied, and list should be empty state.
     expect(await dashboardPage.locator('#product-filter').inputValue()).toBe(D.options ? undefined : D['filters'].productBilling);
     // Above line is a backwards-compat null-guard; use the data value explicitly.
     expect(await dashboardPage.locator('#product-filter').inputValue()).toBe(D.filters.productBilling);
