@@ -22,7 +22,7 @@
         <div class="form-grid">
           <label>
             Product Name
-            <input type="text" id="product" name="product" placeholder="e.g., Billing API" required />
+            <input type="text" id="product" name="product" placeholder="e.g., Billing API" srequired />
           </label>
 
           <label>
@@ -79,14 +79,9 @@
               <option value="non-breaking">Non-breaking only</option>
             </select>
           </label>
-          <label class="checkbox-row">
-            <input type="checkbox" id="archived-toggle" />
-            Show archived
-          </label>
         </div>
       </div>
 
-      <div id="toast" class="toast hidden" aria-live="polite"></div>
       <div id="release-list" class="release-list" aria-live="polite"></div>
     </section>
   </main>
@@ -97,14 +92,11 @@
         <p class="product-version"></p>
         <span class="badge"></span>
       </div>
-      <p class="release-team hidden"></p>
       <h3 class="release-title"></h3>
       <p class="release-description"></p>
       <p class="release-date"></p>
       <div class="card-actions">
         <button type="button" class="btn-edit" data-action="edit">Edit</button>
-        <button type="button" class="btn-archive" data-action="archive">Archive</button>
-        <button type="button" class="btn-delete" data-action="delete">Delete</button>
       </div>
     </article>
   </template>
