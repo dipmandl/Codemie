@@ -51,7 +51,6 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
 
-
     const titleToDelete = D.seedReleases[0].title;
 
     const beforeRaw = await getLocalStorageItem(dashboardPage, D.storageKey);
@@ -83,6 +82,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     });
 
     await page.deleteButtonForTitle(titleToDelete).click();
+
 
     await expect.poll(async () => await page.isEmptyStateVisible()).toBe(true);
   });
