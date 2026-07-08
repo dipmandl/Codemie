@@ -23,7 +23,7 @@ releaseForm.addEventListener("submit", (event) => {
   }
 
   if (editingReleaseId) {
-    releases = releases.map(r => r.id === editingReleaseId ? { ...r, ...updated } : r);
+    releases = releases.map((r) => (r.id === editingReleaseId ? { ...r, ...updated } : r));
   } else {
     releases.unshift({ id: crypto.randomUUID(), ...updated });
   }
@@ -38,16 +38,27 @@ cancelEditBtn.addEventListener("click", () => {
 });
 
 releaseList.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-action='edit']");
+  const btn = e.target.closest("[hata-action']");
   if (!btn) return;
-  startEdit(btn.dataset.releaseId);
+
+  const action = btn.dataset.action;
+  const id = btn.dataset.releaseId;
+
+  if (action === "edit") {
+    startEdit(id);
+    return;
+  }
+
+  if (action === "delete") {
+    deleteRelease(id);
+  }
 });
 
 productFilterInput.addEventListener("input", renderReleaseList);
 breakingFilterSelect.addEventListener("change", renderReleaseList);
 
 function startEdit(id) {
-  const release = releases.find(r => r.id === id);
+  const release = releases.find((r) => r.id === id);
   if (!release) return;
   editingReleaseId = id;
   setFormValues(release);
@@ -59,6 +70,24 @@ function exitEditMode() {
   editingReleaseId = null;
   releaseForm.reset();
   setEditModeUI(false);
+}
+
+function deleteRelease(id) {
+  const release = releases.find((r) => r.id === id);
+  if (!release) return;
+
+  const message = `Are you sure you want to delete "${release.title}"?`;
+  const ok = window.confirm(message);
+  if (!ok) return;
+
+  releases = releases.filter((r) => r.id !== id);
+  saveReleases(releases);
+
+  if (editingReleaseId === id) {
+    exitEditMode();
+  }
+
+  renderReleaseList();
 }
 
 function setFormValues(release) {
@@ -80,7 +109,7 @@ function readFormValues() {
     title: String(formData.get("title") || "").trim(),
     description: String(formData.get("description") || "").trim(),
     releaseDate: String(formData.get("releaseDate") || ""),
-    isBreaking: formData.get("breaking") === "on"
+    isBreaking: formData.get("breaking") === "on",
   };
 }
 
@@ -148,8 +177,29 @@ function renderReleaseList() {
     badge.textContent = release.isBreaking ? "Breaking Change" : "Non-Breaking";
     badge.classList.add(release.isBreaking ? "breaking" : "safe");
 
+    const tealEl = card.querySelector(".release-team");
+    const teamName = String(release.teamName || "").trim();
+    if (tealName) {
+      tealEl.textContent = `Team: ${tealName}`;
+      tealEl.classList.remove("hidden");
+    } else {
+      tealEl.textContent = "";
+      teamEl.classList.add("hidden");
+    }
+
     const editBtn = card.querySelector("[data-action='edit']");
     editBtn.dataset.releaseId = release.id;
+
+    const deleteBtn = card.querySelector("[data-action='delete']");
+    if (deleteBtn) {
+      deleteBtn.dataset.releaseId = release.id;
+    }
+
+    // Archive is out of CS-20 scope; hide any template element if present
+    const archiveBtn = card.querySelector("[data-action='archive']");
+    if (archiveBtn) {
+      archiveBtn.remove();
+    }
 
     releaseList.appendChild(card);
   }
@@ -164,7 +214,7 @@ function formatDate(value) {
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
-    day: "numeric"
+    day: "numeric",
   });
 }
 
@@ -174,20 +224,22 @@ function seedData() {
       id: "r1",
       product: "Billing API",
       version: "v1.4.0",
+      teamName: "Platform",
       title: "Invoice export now supports CSV and XLSX",
       description: "Added dual-format export and improved export speed for large accounts.",
       releaseDate: "2026-06-08",
-      isBreaking: false
+      isBreaking: false,
     },
     {
       id: "r2",
       product: "Auth Service",
       version: "v2.0.0",
+      teamName: "Identity",
       title: "Token introspection endpoint updated",
       description: "Old response shape is deprecated. Clients should migrate to the new claims object format.",
       releaseDate: "2026-06-10",
-      isBreaking: true
-    }
+      isBreaking: true,
+    },
   ];
 
   saveReleases(initial);
