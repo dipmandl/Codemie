@@ -60,7 +60,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
       await dialog.dismiss();
     });
 
-    await page.deleteBtttonForTitle(titleToDelete).click();
+    await page.deleteButtonForTitle(titleToDelete).click();
 
     const afterRaw = await getLocalStorageItem(dashboardPage, D.storageKey);
     const afterTitles = await page.getCardTitles();
