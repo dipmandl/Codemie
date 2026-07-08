@@ -121,7 +121,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
       await dialog.accept();
     });
 
-    await page.deleteBtttonForTitle(D.seedReleases[1].title).click();
+    await page.deleteButtonForTitle(D.seedReleases[1].title).click();
 
     expect(await dashboardPage.locator('#breaking-filter').inputValue()).toBe(D.filters.breakingOnlyValue);
     await expect.poll(async () => await page.isEmptyStateVisible()).toBe(true);
