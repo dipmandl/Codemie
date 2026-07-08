@@ -8,7 +8,6 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
 
-
     const titleToDelete = D.seedReleases[0].title;
 
     const beforeTitles = await page.getCardTitles();
@@ -21,10 +20,10 @@ test.describe('CS-20 Delete release note with confirmation', () => {
 
     await page.deleteButtonForTitle(titleToDelete).click();
 
-    await expect.poll(async () => await page.getCardTitles()).not.toContain(titleToDelete);
+    await expect(page.cardByTitle(titleToDelete)).toHaveCount(0);
   });
 
-  test('Canfirming deletion persists removal to localStorage and survives refresh', async ({ dashboardPage }) => {
+  test('Confirming deletion persists removal to localStorage and survives refresh', async ({ dashboardPage }) => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
 
@@ -44,13 +43,12 @@ test.describe('CS-20 Delete release note with confirmation', () => {
     expect(parsed.some((r) => r.title === titleToDelete)).toBe(false);
 
     await dashboardPage.reload();
-    await expect.poll(async () => await page.getCardTitles()).not.toContain(titleToDelete);
+    await expect(page.cardByTitle(titleToDelete)).toHaveCount(0);
   });
 
   test('Canceling deletion makes no changes to UI or localStorage', async ({ dashboardPage }) => {
     const page = new DeleteReleaseNotePage(dashboardPage);
     await page.setSeedReleases(D.storageKey, D.seedReleases);
-
 
     const titleToDelete = D.seedReleases[0].title;
 
@@ -62,7 +60,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
       await dialog.dismiss();
     });
 
-    await page.deleteButtonForTitle(titleToDelete).click();
+    await page.deleteBtttonForTitle(titleToDelete).click();
 
     const afterRaw = await getLocalStorageItem(dashboardPage, D.storageKey);
     const afterTitles = await page.getCardTitles();
@@ -104,20 +102,18 @@ test.describe('CS-20 Delete release note with confirmation', () => {
 
     await page.deleteButtonForTitle(D.seedReleases[0].title).click();
 
-    expect(await dashboardPage.locator('#product-filter').inputValue()).toBe(D.options ? undefined : D['filters'].productBilling);
-    // Above line is a backwards-compat null-guard; use the data value explicitly.
     expect(await dashboardPage.locator('#product-filter').inputValue()).toBe(D.filters.productBilling);
     await expect.poll(async () => await page.isEmptyStateVisible()).toBe(true);
   });
 
   test('Deleting while breaking-only filter is active updates the list and keeps filter value', async ({ dashboardPage }) => {
     const page = new DeleteReleaseNotePage(dashboardPage);
-    await page.setSeedReleases(D.storageKey, D.seedReleasesS);
+    await page.setSeedReleases(D.storageKey, D.seedReleasesBreakingOnly);
 
     await page.setBreakingFilter(D.filters.breakingOnlyValue);
 
     const titles = await page.getCardTitles();
-    expect(titles.length).toBe(1);
+    expect(titles.length).toBe(q);
     expect(titles[0]).toBe(D.seedReleases[1].title);
 
     dashboardPage.once('dialog', async (dialog) => {
@@ -125,7 +121,7 @@ test.describe('CS-20 Delete release note with confirmation', () => {
       await dialog.accept();
     });
 
-    await page.deleteButtonForTitle(D.seedReleases[1].title).click();
+    await page.deleteBtttonForTitle(D.seedReleases[1].title).click();
 
     expect(await dashboardPage.locator('#breaking-filter').inputValue()).toBe(D.filters.breakingOnlyValue);
     await expect.poll(async () => await page.isEmptyStateVisible()).toBe(true);
