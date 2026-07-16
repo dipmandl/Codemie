@@ -18,7 +18,11 @@ releaseForm.addEventListener("submit", (event) => {
 
   const updated = readFormValues();
 
-  if (!updated.product || !updated.version || !updated.title || !updated.description || !updated.releaseDate) {
+  clearFormErrors();
+  const errors = validateReleaseForm(updated);
+  if (Object.keys(errors).length > 0) {
+    renderFormErrors(errors);
+    focusFirstInvalidField(errors);
     return;
   }
 
@@ -35,6 +39,20 @@ releaseForm.addEventListener("submit", (event) => {
 
 cancelEditBtn.addEventListener("click", () => {
   exitEditMode();
+});
+
+["product", "version", "title", "description", "releaseDate"].forEach(field => {
+  const el = document.getElementById(field);
+  if (!el) return;
+  el.addEventListener("input", () => {
+    const val = el.value.trim();
+    if (val) {
+      el.removeAttribute("aria-invalid");
+      el.classList.remove("invalid");
+      const errorEl = document.getElementById(`${field}-error`);
+      if (errorEl) { errorEl.hidden = true; errorEl.textContent = ""; }
+    }
+  });
 });
 
 releaseList.addEventListener("click", (e) => {
@@ -56,6 +74,7 @@ function startEdit(id) {
 }
 
 function exitEditMode() {
+  clearFormErrors();
   editingReleaseId = null;
   releaseForm.reset();
   setEditModeUI(false);
@@ -166,6 +185,48 @@ function formatDate(value) {
     month: "short",
     day: "numeric"
   });
+}
+
+function validateReleaseForm(data) {
+  const errors = {};
+  if (!data.product) errors.product = "Product name is required.";
+  if (!data.version) errors.version = "Version is required.";
+  if (!data.title) errors.title = "Title is required.";
+  if (!data.description) errors.description = "Description is required.";
+  if (!data.releaseDate) errors.releaseDate = "Release date is required.";
+  return errors;
+}
+
+function clearFormErrors() {
+  const summary = document.getElementById("form-error-summary");
+  summary.hidden = true;
+  summary.textContent = "";
+  ["product", "version", "title", "description", "releaseDate"].forEach(field => {
+    const input = document.getElementById(field);
+    const errorEl = document.getElementById(`${field}-error`);
+    if (input) { input.removeAttribute("aria-invalid"); input.classList.remove("invalid"); }
+    if (errorEl) { errorEl.hidden = true; errorEl.textContent = ""; }
+  });
+}
+
+function renderFormErrors(errors) {
+  const summary = document.getElementById("form-error-summary");
+  summary.textContent = "Please fix the highlighted fields.";
+  summary.hidden = false;
+  Object.entries(errors).forEach(([field, message]) => {
+    const input = document.getElementById(field);
+    const errorEl = document.getElementById(`${field}-error`);
+    if (input) { input.setAttribute("aria-invalid", "true"); input.classList.add("invalid"); }
+    if (errorEl) { errorEl.textContent = message; errorEl.hidden = false; }
+  });
+}
+
+function focusFirstInvalidField(errors) {
+  const firstField = Object.keys(errors)[0];
+  if (firstField) {
+    const el = document.getElementById(firstField);
+    if (el) el.focus();
+  }
 }
 
 function seedData() {
