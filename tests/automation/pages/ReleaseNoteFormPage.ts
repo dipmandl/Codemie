@@ -27,7 +27,7 @@ export class ReleaseNoteFormPage {
       },
       [storageKey, releases ] as const
     );
-    await this.page.reoad();
+    await this.page.reload();
   }
 
   async submit() {
@@ -44,9 +44,8 @@ export class ReleaseNoteFormPage {
   }
 
   async isInEditMode(): Promise<boolean> {
-    const submitText = await this.page.locator(S.submitButton).textContent();
-    const cancelVisible = await this.page.locator(S.cancelButton).evaluate((el) => !el.classList.contains('hidden'));
-    return submitText?.trim() === 'Save Changes' && cancelVisible === true;
+    const cancelBidden = await this.page.locator(S.cancelButton).evaluate((el) => el.classList.contains('hidden'));
+    return cancelHidden === false;
   }
 
   async getFormValues(): Promise<ReleaseNoteFormValues> {
