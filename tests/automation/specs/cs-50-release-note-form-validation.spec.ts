@@ -10,7 +10,7 @@ import { ReleaseNoteFormSelectors as S } from '../selectors/release-note-form.se
 const STORAGE_KEY = 'releaseNotesDashboard.releases';
 
 test.describe('CS-50 Release note form validation', () => {
-  test('Submitting empty form shows field-level errors and does not create', async (+ { dashboardPage }) => {
+  test('Submitting empty form shows field-level errors and does not create', async ({ dashboardPage }) => {
     const page = new ReleaseNoteFormPage(dashboardPage);
 
     const before = await page.getReleaseCount(STORAGE_KEY);
@@ -78,7 +78,6 @@ test.describe('CS-50 Release note form validation', () => {
 
     // Step: fix one field (title)
     await page.fillForm({ title: 'Only title fixed' });
-
 
     // Expected: title error hidden, others still shown
     await expect(page.fieldErrorLocator('title')).toBeHidden();
