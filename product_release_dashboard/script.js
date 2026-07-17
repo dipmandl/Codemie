@@ -38,9 +38,16 @@ cancelEditBtn.addEventListener("click", () => {
 });
 
 releaseList.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-action='edit']");
-  if (!btn) return;
-  startEdit(btn.dataset.releaseId);
+  const editBtn = e.target.closest("[data-action='edit']");
+  if (editBtn) {
+    startEdit(editBtn.dataset.releaseId);
+    return;
+  }
+
+  const deleteBtn = e.target.closest("[data-action='delete']");
+  if (deleteBtn) {
+    deleteRelease(deleteBtn.dataset.releaseId);
+  }
 });
 
 productFilterInput.addEventListener("input", renderReleaseList);
@@ -59,6 +66,23 @@ function exitEditMode() {
   editingReleaseId = null;
   releaseForm.reset();
   setEditModeUI(false);
+}
+
+function deleteRelease(id) {
+  const release = releases.find(r => r.id === id);
+  if (!release) return;
+
+  const ok = window.confirm(`Delete release note "${release.title}"?`);
+  if (!ok) return;
+
+  releases = releases.filter(r => r.id !== id);
+  saveReleases(releases);
+
+  if (editingReleaseId === id) {
+    exitEditMode();
+  }
+
+  renderReleaseList();
 }
 
 function setFormValues(release) {
@@ -150,6 +174,9 @@ function renderReleaseList() {
 
     const editBtn = card.querySelector("[data-action='edit']");
     editBtn.dataset.releaseId = release.id;
+
+    const deleteBtn = card.querySelector("[data-action='delete']");
+    deleteBtn.dataset.releaseId = release.id;
 
     releaseList.appendChild(card);
   }
