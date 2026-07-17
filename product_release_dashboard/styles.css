@@ -326,3 +326,36 @@ button:hover {
 .hidden {
   display: none !important;
 }
+
+/* CS-50: Validation error styles */
+.form-error-summary {
+  background: #fce8e4;
+  color: var(--danger);
+  border: 1px solid #f0b9b1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+input.invalid,
+textarea.invalid,
+select.invalid {
+  border-color: var(--danger);
+  outline-color: #f0b9b1;
+}
+
+input.invalid:focus,
+textarea.invalid:focus,
+select.invalid:focus {
+  outline: 2px solid #f0b9b1;
+  border-color: var(--danger);
+}
